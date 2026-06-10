@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Five Crowns 👑</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Baloo+2:wght@500;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none}
+html,body{height:100%}
+body{
+  font-family:'Baloo 2','Comic Sans MS',sans-serif;color:#1b1b2f;overflow:hidden;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,.08) 0 2px, transparent 3px),
+    radial-gradient(circle at 80% 10%, rgba(255,255,255,.10) 0 2px, transparent 3px),
+    radial-gradient(circle at 60% 70%, rgba(255,255,255,.06) 0 2px, transparent 3px),
+    radial-gradient(circle at 30% 85%, rgba(255,255,255,.08) 0 2px, transparent 3px),
+    linear-gradient(160deg,#22307a 0%,#4a2a8f 55%,#79288c 100%);
+}
+.hidden{display:none!important}
+.pixel{font-family:'Press Start 2P',monospace}
+.btn{
+  font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;color:#1b1b2f;
+  border:3px solid #1b1b2f;border-radius:14px;padding:9px 18px;cursor:pointer;
+  background:linear-gradient(#ffe066,#ffb300);box-shadow:0 5px 0 #9a6a00,0 8px 12px rgba(0,0,0,.35);
+  transition:transform .07s, box-shadow .07s;white-space:nowrap;
+}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #9a6a00}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn.blue{background:linear-gradient(#7ec8ff,#2f8de4);color:#fff;box-shadow:0 5px 0 #1a548c,0 8px 12px rgba(0,0,0,.35)}
+.btn.green{background:linear-gradient(#8be38b,#2fa84f);color:#fff;box-shadow:0 5px 0 #1a6b32,0 8px 12px rgba(0,0,0,.35)}
+.btn.red{background:linear-gradient(#ff9d9d,#e04444);color:#fff;box-shadow:0 5px 0 #8c1f1f,0 8px 12px rgba(0,0,0,.35)}
+.btn.small{font-size:13px;padding:5px 12px;border-radius:10px;box-shadow:0 4px 0 rgba(0,0,0,.4)}
+.panel{background:#fffdf2;border:4px solid #1b1b2f;border-radius:20px;box-shadow:0 10px 0 rgba(0,0,0,.30),0 16px 30px rgba(0,0,0,.35)}
+
+/* ---------- SETUP ---------- */
+#setup{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:50;overflow:auto;padding:18px}
+.setup-box{width:min(620px,94vw);padding:26px 30px;text-align:center}
+.title{font-family:'Press Start 2P',monospace;font-size:clamp(20px,4vw,34px);color:#ffd83d;
+  text-shadow:3px 3px 0 #1b1b2f,6px 6px 0 rgba(0,0,0,.25);letter-spacing:2px;line-height:1.4}
+.title .crown{font-size:1.4em;display:block;filter:drop-shadow(2px 3px 0 #1b1b2f)}
+.subtitle{color:#fff;font-weight:700;margin-top:6px;text-shadow:1px 2px 0 rgba(0,0,0,.4)}
+.setup-head{margin-bottom:14px}
+.setup-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0;text-align:left}
+.setup-row label{font-weight:800;font-size:17px}
+.setup-row input[type=text]{font-family:'Baloo 2';font-weight:700;font-size:16px;padding:7px 12px;border:3px solid #1b1b2f;border-radius:10px;width:200px;background:#fff}
+select{font-family:'Baloo 2';font-weight:700;font-size:15px;padding:6px 10px;border:3px solid #1b1b2f;border-radius:10px;background:#fff;cursor:pointer}
+.opp-setup{background:#f1ecff;border:3px solid #1b1b2f;border-radius:14px;padding:8px 12px;margin:6px 0;display:flex;align-items:center;gap:10px;justify-content:space-between}
+.opp-setup .who{font-weight:800;font-size:17px;display:flex;align-items:center;gap:8px}
+.opp-setup .who span.em{font-size:24px}
+#startBtn{font-size:20px;margin-top:16px;padding:12px 34px}
+.setup-note{font-size:13px;color:#666;margin-top:10px}
+
+/* ---------- GAME LAYOUT ---------- */
+#game{position:fixed;inset:0;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:12px;padding:8px 14px;flex-wrap:wrap;
+  background:rgba(0,0,0,.28);border-bottom:3px solid rgba(0,0,0,.35)}
+header .gametitle{font-family:'Press Start 2P';font-size:13px;color:#ffd83d;text-shadow:2px 2px 0 #1b1b2f}
+.roundchip{background:#fffdf2;border:3px solid #1b1b2f;border-radius:12px;padding:4px 12px;font-weight:800;font-size:15px;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+.wildchip{background:linear-gradient(#ffe066,#ffb300);border:3px solid #1b1b2f;border-radius:12px;padding:4px 12px;font-weight:800;font-size:15px;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+header .spacer{flex:1}
+#opponents{display:flex;justify-content:center;gap:10px;padding:10px 12px 2px;flex-wrap:wrap}
+.opp{background:rgba(255,253,242,.94);border:3px solid #1b1b2f;border-radius:16px;padding:6px 10px;min-width:128px;text-align:center;position:relative;box-shadow:0 5px 0 rgba(0,0,0,.30);transition:transform .2s}
+.opp.active{background:#fff3bd;transform:translateY(-3px) scale(1.05);box-shadow:0 0 0 4px #ffd83d,0 6px 0 rgba(0,0,0,.30)}
+.opp.outp{background:#d9ffe3}
+.opp .ava{font-size:30px;line-height:1}
+.opp .nm{font-weight:800;font-size:14px}
+.opp .nm .sk{font-size:12px}
+.opp .minis{display:flex;justify-content:center;margin-top:3px;height:26px}
+.mini{width:18px;height:26px;border-radius:4px;border:2px solid #1b1b2f;margin-left:-8px;
+  background:repeating-linear-gradient(45deg,#2f4fd0,#2f4fd0 4px,#2540a8 4px,#2540a8 8px)}
+.mini:first-child{margin-left:0}
+.opp .sc{font-size:13px;font-weight:800;color:#444}
+.opp .flash{position:absolute;left:50%;transform:translateX(-50%);bottom:-20px;background:#1b1b2f;color:#fff;font-size:11px;font-weight:700;border-radius:8px;padding:2px 8px;white-space:nowrap;z-index:5}
+.opp .outbadge{position:absolute;top:-10px;right:-8px;background:#2fa84f;color:#fff;border:2px solid #1b1b2f;border-radius:10px;font-size:11px;font-weight:800;padding:1px 7px;transform:rotate(8deg)}
+
+#felt{flex:1;display:flex;align-items:center;justify-content:center;gap:34px;position:relative;min-height:170px}
+#felt .table-oval{position:absolute;inset:8px 6vw;border-radius:48% / 60%;
+  background:radial-gradient(ellipse at 50% 40%,#39b568,#1d7a3f 70%,#15602f);
+  border:6px solid #c98f3d;box-shadow:inset 0 0 60px rgba(0,0,0,.35),0 14px 30px rgba(0,0,0,.4)}
+.pilewrap{position:relative;z-index:2;text-align:center}
+.pilelabel{color:#eafff0;font-weight:800;font-size:13px;text-shadow:1px 1px 0 rgba(0,0,0,.5);margin-bottom:4px}
+.pile{position:relative;width:84px;height:118px;border-radius:12px;cursor:pointer}
+.pile .stackshadow{position:absolute;inset:0;border-radius:12px}
+.pile.glow{animation:pglow 1s infinite alternate}
+@keyframes pglow{from{filter:drop-shadow(0 0 4px #ffd83d)}to{filter:drop-shadow(0 0 16px #ffe96b)}}
+.pile .count{position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);background:#1b1b2f;color:#ffd83d;font-weight:800;font-size:12px;border-radius:9px;padding:1px 9px;z-index:6}
+.pile .empty{position:absolute;inset:0;border:3px dashed rgba(255,255,255,.55);border-radius:12px}
+#wildIndicator{position:relative;z-index:2;text-align:center;color:#fff}
+#wildIndicator .wbig{font-family:'Press Start 2P';font-size:11px;color:#ffe066;text-shadow:2px 2px 0 #1b1b2f;margin-bottom:5px}
+
+#msgbar{text-align:center;padding:4px 12px;min-height:30px}
+#msgbar .msg{display:inline-block;background:rgba(27,27,47,.85);color:#fff;font-weight:700;font-size:15px;border-radius:12px;padding:4px 16px;border:2px solid rgba(255,255,255,.25)}
+
+/* ---------- HAND ---------- */
+#handArea{padding:6px 10px 14px;background:rgba(0,0,0,.22);border-top:3px solid rgba(0,0,0,.3)}
+#humanInfo{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:4px;color:#fff;font-weight:800}
+#humanInfo .you{background:rgba(255,253,242,.95);color:#1b1b2f;border:3px solid #1b1b2f;border-radius:12px;padding:2px 12px;display:flex;gap:8px;align-items:center;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+#humanInfo .you.active{background:#fff3bd;box-shadow:0 0 0 3px #ffd83d,0 3px 0 rgba(0,0,0,.4)}
+#deadwoodLbl{font-size:14px;text-shadow:1px 1px 0 rgba(0,0,0,.5)}
+#deadwoodLbl b{color:#ffe066}
+#hand{display:flex;justify-content:center;align-items:flex-end;min-height:128px;padding:14px 6px 4px}
+#controls{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+
+/* ---------- CARDS ---------- */
+.card{
+  width:78px;height:110px;border-radius:11px;background:linear-gradient(170deg,#ffffff,#f2f0e6);
+  border:3px solid #1b1b2f;box-shadow:0 4px 8px rgba(0,0,0,.35);
+  position:relative;flex:none;transition:transform .12s, box-shadow .12s;
+}
+#hand .card{margin-left:-30px;cursor:pointer}
+#hand .card:first-child{margin-left:0}
+#hand .card:hover{transform:translateY(-10px)}
+#hand .card.sel{transform:translateY(-22px);box-shadow:0 0 0 4px #ffd83d,0 10px 14px rgba(0,0,0,.4)}
+.card.meldhl{box-shadow:0 0 0 3px #51e07e,0 4px 8px rgba(0,0,0,.35)}
+#hand .card.sel.meldhl{box-shadow:0 0 0 4px #ffd83d,0 0 0 7px #51e07e,0 10px 14px rgba(0,0,0,.4)}
+.card.justdrawn{animation:pop .45s}
+@keyframes pop{0%{transform:translateY(-34px) scale(1.25)}100%{transform:none}}
+.card .corner{position:absolute;top:4px;left:6px;font-weight:800;font-size:18px;line-height:.95;color:var(--sc);text-align:center}
+.card .corner span{display:block;font-size:14px}
+.card .corner.br{top:auto;left:auto;bottom:4px;right:6px;transform:rotate(180deg)}
+.card .big{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:44px;color:var(--sc);text-shadow:1px 2px 0 rgba(0,0,0,.12)}
+.card.wildc{border-color:#9a6a00;background:linear-gradient(170deg,#fffbe8,#ffedb0)}
+.card .wbadge{position:absolute;bottom:18px;left:50%;transform:translateX(-50%) rotate(-7deg);background:#e04444;color:#fff;font-size:10px;font-weight:800;border-radius:7px;padding:1px 7px;border:2px solid #1b1b2f;letter-spacing:1px}
+.card.joker{background:linear-gradient(170deg,#f3e8ff,#d9c2ff);border-color:#4a2a8f}
+.card.joker .jk{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:42px;filter:drop-shadow(1px 2px 0 rgba(0,0,0,.2))}
+.card.joker .jlabel{position:absolute;bottom:8px;width:100%;text-align:center;font-size:11px;font-weight:800;color:#4a2a8f;letter-spacing:2px}
+.card.back{background:
+  radial-gradient(circle at 50% 50%, rgba(255,255,255,.18) 0 6px, transparent 7px),
+  repeating-linear-gradient(45deg,#2f4fd0,#2f4fd0 6px,#2540a8 6px,#2540a8 12px)}
+.card.back::after{content:'👑';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.4))}
+.card.sm{width:46px;height:65px;border-width:2px;border-radius:7px}
+.card.sm .corner{font-size:11px;top:2px;left:3px}
+.card.sm .corner span{font-size:9px}
+.card.sm .corner.br{display:none}
+.card.sm .big{font-size:24px}
+.card.sm .wbadge{font-size:7px;padding:0 4px;bottom:8px;border-width:1px}
+.card.sm.joker .jk{font-size:24px}
+.card.sm.joker .jlabel{font-size:7px;bottom:3px;letter-spacing:1px}
+.pile .card{position:absolute;top:0;left:0;width:84px;height:118px}
+
+/* ---------- BANNER ---------- */
+#banner{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%) scale(0);z-index:80;
+  font-family:'Press Start 2P';font-size:clamp(15px,3vw,26px);color:#ffd83d;text-align:center;
+  text-shadow:3px 3px 0 #1b1b2f,6px 6px 14px rgba(0,0,0,.6);pointer-events:none;line-height:1.6}
+#banner.show{animation:bannerIn 1.9s ease forwards}
+@keyframes bannerIn{0%{transform:translate(-50%,-50%) scale(0)}14%{transform:translate(-50%,-50%) scale(1.15)}22%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.1)}}
+
+/* ---------- OVERLAYS ---------- */
+.overlay{position:fixed;inset:0;background:rgba(15,15,35,.78);z-index:90;display:flex;align-items:center;justify-content:center;padding:16px}
+.overlay .obox{max-width:min(960px,96vw);max-height:92vh;overflow:auto;padding:22px 26px}
+.obox h2{font-family:'Press Start 2P';font-size:17px;text-align:center;margin-bottom:14px;color:#4a2a8f}
+.result-row{border:3px solid #1b1b2f;border-radius:14px;padding:8px 12px;margin:8px 0;background:#fff}
+.result-row.winner{background:#e3ffe9}
+.result-head{display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px;flex-wrap:wrap}
+.result-head .pts{margin-left:auto;font-size:18px}
+.result-head .outstar{background:#2fa84f;color:#fff;border-radius:8px;font-size:12px;padding:1px 8px;border:2px solid #1b1b2f}
+.meldline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+.meldgroup{display:flex;gap:3px;background:#eafbe9;border:2px solid #9ad8a0;border-radius:9px;padding:4px}
+.meldgroup.deadg{background:#ffe9e9;border-color:#e0a0a0}
+.glabel{font-size:11px;font-weight:800;color:#555;align-self:center}
+table.scoretab{border-collapse:collapse;margin:6px auto;font-size:14px;width:100%}
+.scoretab th,.scoretab td{border:2px solid #1b1b2f;padding:4px 8px;text-align:center;font-weight:700}
+.scoretab th{background:#ffe066}
+.scoretab td.tot{background:#f1ecff;font-weight:800}
+.scoretab tr.cur td{background:#fff3bd}
+.scoretab .went{color:#2fa84f}
+.obox .obtns{text-align:center;margin-top:14px}
+
+/* score drawer */
+#drawer{position:fixed;top:0;right:-360px;width:340px;height:100%;z-index:85;transition:right .25s ease;padding:14px;overflow:auto;
+  background:#fffdf2;border-left:4px solid #1b1b2f;box-shadow:-10px 0 30px rgba(0,0,0,.4)}
+#drawer.open{right:0}
+#drawer h3{font-family:'Press Start 2P';font-size:13px;margin:4px 0 10px;color:#4a2a8f;text-align:center}
+
+#gameOverBox .standing{display:flex;align-items:center;gap:12px;border:3px solid #1b1b2f;border-radius:14px;padding:8px 14px;margin:8px 0;font-weight:800;font-size:18px;background:#fff}
+#gameOverBox .standing.first{background:linear-gradient(#fff3bd,#ffe066);font-size:21px}
+#gameOverBox .standing .pl{margin-left:auto}
+#confetti{position:fixed;inset:0;z-index:95;pointer-events:none}
+
+.rules{text-align:left;font-size:15px;line-height:1.55;font-weight:600}
+.rules h4{margin:10px 0 2px;color:#4a2a8f}
+@media (max-width:760px){
+  .card{width:60px;height:86px}.card .big{font-size:33px}
+  #hand .card{margin-left:-26px}
+  .pile,.pile .card{width:66px;height:94px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ SETUP SCREEN ============ -->
+<div id="setup">
+  <div class="setup-box panel">
+    <div class="setup-head">
+      <div class="title"><span class="crown">👑</span>FIVE CROWNS</div>
+      <div class="subtitle">★ The five-suited rummy showdown ★</div>
+    </div>
+    <div class="setup-row"><label>Your name</label><input type="text" id="pname" value="Glen" maxlength="12"></div>
+    <div class="setup-row"><label>Computer players</label>
+      <select id="oppCount">
+        <option>1</option><option>2</option><option selected>3</option>
+        <option>4</option><option>5</option><option>6</option>
+      </select>
+    </div>
+    <div id="oppRows"></div>
+    <button class="btn green" id="startBtn">▶ START GAME</button>
+    <div class="setup-note">11 rounds · lowest total score wins · Jokers &amp; the round number are wild</div>
+  </div>
+</div>
+
+<!-- ============ GAME ============ -->
+<div id="game" class="hidden">
+  <header>
+    <div class="gametitle">👑 FIVE CROWNS</div>
+    <div class="roundchip" id="roundChip"></div>
+    <div class="wildchip" id="wildChip"></div>
+    <div class="spacer"></div>
+    <button class="btn blue small" id="rulesBtn">❓ Rules</button>
+    <button class="btn small" id="scoreBtn">🏆 Scores</button>
+    <button class="btn small" id="muteBtn">🔊</button>
+    <button class="btn red small" id="newBtn">↺ New Game</button>
+  </header>
+
+  <div id="opponents"></div>
+
+  <div id="felt">
+    <div class="table-oval"></div>
+    <div class="pilewrap">
+      <div class="pilelabel">DRAW</div>
+      <div class="pile" id="stockPile"></div>
+    </div>
+    <div id="wildIndicator"></div>
+    <div class="pilewrap">
+      <div class="pilelabel">DISCARD</div>
+      <div class="pile" id="discardPile"></div>
+    </div>
+  </div>
+
+  <div id="msgbar"><span class="msg" id="msgTxt"></span></div>
+
+  <div id="handArea">
+    <div id="humanInfo">
+      <div class="you" id="youChip"></div>
+      <div id="deadwoodLbl"></div>
+    </div>
+    <div id="hand"></div>
+    <div id="controls">
+      <button class="btn small blue" id="sortRankBtn">Sort: 123</button>
+      <button class="btn small blue" id="sortSuitBtn">Sort: ♥♣★</button>
+      <button class="btn small green" id="smartBtn">✨ Smart Sort</button>
+      <button class="btn red" id="discardBtn">⬇ Discard</button>
+    </div>
+  </div>
+</div>
+
+<div id="banner"></div>
+
+<div id="drawer"><h3>🏆 SCORECARD</h3><div id="drawerBody"></div>
+  <div style="text-align:center;margin-top:10px"><button class="btn small" onclick="document.getElementById('drawer').classList.remove('open')">Close</button></div>
+</div>
+
+<div class="overlay hidden" id="roundOverlay"><div class="obox panel" id="roundBox"></div></div>
+<div class="overlay hidden" id="gameOverlay"><div class="obox panel" id="gameOverBox"></div></div>
+<div class="overlay hidden" id="rulesOverlay">
+  <div class="obox panel">
+    <h2>HOW TO PLAY</h2>
+    <div class="rules">
+      <h4>Goal</h4>
+      Lowest total score after 11 rounds wins. Each round you try to arrange your whole hand into <b>books</b> (3+ cards of the same rank) and <b>runs</b> (3+ consecutive cards of the same suit).
+      <h4>Rounds &amp; wilds</h4>
+      Round 1 deals 3 cards and 3s are wild … up to round 11 with 13 cards and Kings wild. Jokers are always wild. Wild cards can stand in for any card in a book or run.
+      <h4>Your turn</h4>
+      Draw one card from the <b>deck</b> or take the top of the <b>discard pile</b>, then discard one card (not the one you just took from the discard pile).
+      <h4>Going out</h4>
+      If after your discard every card in your hand fits into books/runs, you <b>go out</b> — everyone else gets one last turn, then leftover cards count against them.
+      <h4>Scoring leftovers</h4>
+      3–10 = face value · J=11 · Q=12 · K=13 · round wild = 20 · Joker = 50.
+      <h4>Tips</h4>
+      Watch the green glow — those cards already fit in a meld. The counter shows your best possible leftover points.
+    </div>
+    <div class="obtns"><button class="btn green" onclick="document.getElementById('rulesOverlay').classList.add('hidden')">Got it!</button></div>
+  </div>
+</div>
+<canvas id="confetti"></canvas>
+
+<script>
+/*__LOGIC_START__*/
+'use strict';
+const SUITS=[
+  {n:'Stars',s:'★',c:'#d9a300'},
+  {n:'Hearts',s:'♥',c:'#e03f3f'},
+  {n:'Clubs',s:'♣',c:'#2e9e4f'},
+  {n:'Spades',s:'♠',c:'#33334d'},
+  {n:'Diamonds',s:'♦',c:'#2f6fe0'}
+];
+const JOKER=5;
+function buildDeck(){
+  const d=[];let id=0;
+  for(let copy=0;copy<2;copy++){
+    for(let s=0;s<5;s++)for(let r=3;r<=13;r++)d.push({id:id++,suit:s,rank:r});
+    for(let k=0;k<3;k++)d.push({id:id++,suit:JOKER,rank:0});
+  }
+  return d;
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function isWild(c,round){return c.suit===JOKER||c.rank===round;}
+function cardValue(c,round){return c.suit===JOKER?50:(c.rank===round?20:c.rank);}
+function rankName(r){return r===11?'J':r===12?'Q':r===13?'K':String(r);}
+
+/* Optimal meld solver: minimizes leftover (deadwood) points.
+   Returns {pts, melds:[{type,cards:[...]}], dead:[cards]} */
+function bestMeld(cards,round){
+  const naturals=[],jokers=[],rwilds=[];
+  for(const c of cards){
+    if(c.suit===JOKER)jokers.push(c);
+    else if(c.rank===round)rwilds.push(c);
+    else naturals.push(c);
+  }
+  naturals.sort((a,b)=>a.suit-b.suit||a.rank-b.rank||a.id-b.id);
+  const memo=new Map();
+  function solve(nat,j,w){
+    let key='';
+    for(let i=0;i<nat.length;i++)key+=(nat[i].suit*16+nat[i].rank)+',';
+    key+='#'+j+'#'+w;
+    const hit=memo.get(key);
+    if(hit)return hit;
+    let best;
+    if(nat.length===0){
+      const t=j+w;
+      if(t===0)best={pts:0,melds:[],dead:[],dj:0,dw:0};
+      else if(t>=3)best={pts:0,melds:[{type:'wilds',cards:[],wj:j,ww:w}],dead:[],dj:0,dw:0};
+      else best={pts:j*50+w*20,melds:[],dead:[],dj:j,dw:w};
+    }else{
+      const c=nat[0];
+      const r0=solve(nat.slice(1),j,w);
+      best={pts:r0.pts+c.rank,melds:r0.melds,dead:[c].concat(r0.dead),dj:r0.dj,dw:r0.dw};
+      // ---- books (sets of same rank) ----
+      const same=[];
+      for(let i=1;i<nat.length;i++)if(nat[i].rank===c.rank)same.push(i);
+      for(let m=0;m<=same.length;m++){
+        const wu=Math.max(0,2-m); // minimum wilds to reach size 3 (extra wilds get absorbed later)
+        if(1+m+wu<3)continue;
+        if(wu>j+w)continue;
+        const uj=Math.min(j,wu),uw=wu-uj;
+        const usedSet={};
+        for(let q=0;q<m;q++)usedSet[same[q]]=1;
+        const rest=[];
+        for(let i=1;i<nat.length;i++)if(!usedSet[i])rest.push(nat[i]);
+        const r=solve(rest,j-uj,w-uw);
+        const meld={type:'book',cards:[c].concat(same.slice(0,m).map(i=>nat[i])),wj:uj,ww:uw};
+        let pts=r.pts,dj=r.dj,dw=r.dw;
+        if(dj||dw){pts-=dj*50+dw*20;meld.wj+=dj;meld.ww+=dw;dj=0;dw=0;}
+        if(pts<best.pts)best={pts,melds:[meld].concat(r.melds),dead:r.dead,dj,dw};
+      }
+      // ---- runs (consecutive, same suit) ----
+      const byRank={};
+      for(let i=1;i<nat.length;i++){
+        const n=nat[i];
+        if(n.suit===c.suit&&n.rank!==c.rank&&byRank[n.rank]===undefined)byRank[n.rank]=i;
+      }
+      for(let lo=Math.max(3,c.rank-10);lo<=c.rank;lo++){
+        for(let hi=c.rank;hi<=13;hi++){
+          if(hi-lo+1<3)continue;
+          const used=[];let need=0,ok=true;
+          for(let rk=lo;rk<=hi;rk++){
+            if(rk===c.rank)continue;
+            if(byRank[rk]!==undefined)used.push(byRank[rk]);
+            else need++;
+          }
+          if(need>j+w)continue;
+          const uj=Math.min(j,need),uw=need-uj;
+          const usedSet={};
+          for(const u of used)usedSet[u]=1;
+          const rest=[];
+          for(let i=1;i<nat.length;i++)if(!usedSet[i])rest.push(nat[i]);
+          const r=solve(rest,j-uj,w-uw);
+          const meld={type:'run',cards:[c].concat(used.map(i=>nat[i])),wj:uj,ww:uw};
+          let pts=r.pts,dj=r.dj,dw=r.dw;
+          if(dj||dw){pts-=dj*50+dw*20;meld.wj+=dj;meld.ww+=dw;dj=0;dw=0;}
+          if(pts<best.pts)best={pts,melds:[meld].concat(r.melds),dead:r.dead,dj,dw};
+        }
+      }
+    }
+    memo.set(key,best);
+    return best;
+  }
+  const res=solve(naturals,jokers.length,rwilds.length);
+  // materialize wild cards into melds
+  const jp=jokers.slice(),wp=rwilds.slice();
+  const melds=res.melds.map(m=>{
+    const cs=m.cards.slice();
+    for(let k=0;k<m.wj;k++)cs.push(jp.pop());
+    for(let k=0;k<m.ww;k++)cs.push(wp.pop());
+    return {type:m.type,cards:cs};
+  });
+  const dead=res.dead.concat(jp,wp);
+  return {pts:res.pts,melds,dead};
+}
+
+/* Evaluate every possible discard; sorted best-first (lowest leftover, then dump biggest card). */
+function discardOptions(cards,round,banId){
+  const opts=[];
+  for(let i=0;i<cards.length;i++){
+    if(banId!=null&&cards[i].id===banId)continue;
+    const rest=cards.slice(0,i).concat(cards.slice(i+1));
+    const r=bestMeld(rest,round);
+    opts.push({i,id:cards[i].id,pts:r.pts,val:cardValue(cards[i],round)});
+  }
+  opts.sort((a,b)=>a.pts-b.pts||b.val-a.val);
+  return opts;
+}
+function aiWantsDiscardCard(hand,top,round,skill){
+  if(skill==='easy'){
+    if(isWild(top,round))return Math.random()<0.7;
+    let pair=false;
+    for(const c of hand)if(c.suit!==JOKER&&c.rank===top.rank)pair=true;
+    return pair&&Math.random()<0.5;
+  }
+  const cur=bestMeld(hand,round).pts;
+  const cand=discardOptions(hand.concat([top]),round,top.id);
+  if(!cand.length)return false;
+  const gain=cur-cand[0].pts;
+  if(skill==='expert')return gain>0||(gain===0&&isWild(top,round));
+  return gain>0;
+}
+function aiPick(opts,skill){
+  if(!opts.length)return null;
+  if(skill==='expert')return opts[0];
+  if(skill==='normal'){
+    if(opts.length>1&&Math.random()<0.25&&opts[1].pts-opts[0].pts<=6)return opts[1];
+    return opts[0];
+  }
+  // easy: avoid throwing jokers, otherwise sloppy
+  const pool=opts.filter(o=>o.val!==50);
+  const list=pool.length?pool:opts;
+  if(Math.random()<0.45)return list[0];
+  return list[Math.floor(Math.random()*list.length)];
+}
+/*__LOGIC_END__*/
+
+/* ================= UI / GAME STATE ================= */
+const $=s=>document.querySelector(s);
+const AI_POOL=[
+  {name:'Goomby',emoji:'🍄'},{name:'Sheldon',emoji:'🐢'},{name:'BooBoo',emoji:'👻'},
+  {name:'Rexy',emoji:'🦖'},{name:'Stella',emoji:'⭐'},{name:'Drago',emoji:'🐉'}
+];
+const SKILLS={easy:{label:'Easy',icon:'🌱'},normal:{label:'Normal',icon:'⭐'},expert:{label:'Expert',icon:'👑'}};
+const ROUNDS=[3,4,5,6,7,8,9,10,11,12,13];
+let S=null;
+let muted=false;
+
+/* ---------- sounds ---------- */
+let AC=null;
+function tone(freq,dur,type,vol,when){
+  const t=AC.currentTime+(when||0);
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.type=type||'square';o.frequency.value=freq;
+  g.gain.setValueAtTime(vol||0.12,t);
+  g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  o.connect(g).connect(AC.destination);
+  o.start(t);o.stop(t+dur+0.02);
+}
+function sfx(kind){
+  if(muted)return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended')AC.resume();
+    if(kind==='draw')tone(520,0.09,'square',0.10);
+    else if(kind==='discard')tone(300,0.10,'triangle',0.12);
+    else if(kind==='select')tone(700,0.05,'square',0.06);
+    else if(kind==='goout'){tone(523,0.12,'square',0.12);tone(659,0.12,'square',0.12,0.12);tone(784,0.12,'square',0.12,0.24);tone(1047,0.3,'square',0.12,0.36);}
+    else if(kind==='round'){tone(392,0.15,'triangle',0.12);tone(523,0.2,'triangle',0.12,0.15);}
+    else if(kind==='win'){[523,659,784,1047,784,1047,1319].forEach((f,i)=>tone(f,0.16,'square',0.12,i*0.14));}
+    else if(kind==='bad')tone(160,0.18,'sawtooth',0.10);
+  }catch(e){}
+}
+
+/* ---------- setup screen ---------- */
+function buildOppRows(){
+  const n=+$('#oppCount').value;
+  let html='';
+  for(let i=0;i<n;i++){
+    html+=`<div class="opp-setup">
+      <div class="who"><span class="em">${AI_POOL[i].emoji}</span>${AI_POOL[i].name}</div>
+      <div><label style="font-size:13px;font-weight:700;margin-right:6px">Skill</label>
+      <select id="skill${i}">
+        <option value="easy">🌱 Easy</option>
+        <option value="normal" selected>⭐ Normal</option>
+        <option value="expert">👑 Expert</option>
+      </select></div>
+    </div>`;
+  }
+  $('#oppRows').innerHTML=html;
+}
+$('#oppCount').addEventListener('change',buildOppRows);
+buildOppRows();
+
+$('#startBtn').addEventListener('click',()=>{
+  const n=+$('#oppCount').value;
+  const players=[{name:($('#pname').value.trim()||'You'),emoji:'😎',skill:'human',human:true}];
+  for(let i=0;i<n;i++)players.push({name:AI_POOL[i].name,emoji:AI_POOL[i].emoji,skill:$('#skill'+i).value,human:false});
+  for(const p of players){p.hand=[];p.total=0;p.scores={};p.out={};p.lastResult=null;p.flash=null;}
+  S={players,roundIdx:0,round:3,dealer:Math.floor(Math.random()*players.length),
+     stock:[],discard:[],turn:0,outPlayer:null,finalLeft:0,phase:'idle',
+     humanPhase:null,selected:null,drawnFromDiscardId:null,justDrawnId:null,sortMode:'smart',reshuffles:0};
+  $('#setup').classList.add('hidden');
+  $('#game').classList.remove('hidden');
+  sfx('round');
+  startRound();
+});
+
+/* ---------- round flow ---------- */
+function me(){return S.players[0];}
+function wildName(){return rankName(S.round)+'s';}
+function startRound(){
+  S.round=ROUNDS[S.roundIdx];
+  S.stock=shuffle(buildDeck());
+  S.discard=[];S.outPlayer=null;S.finalLeft=0;S.reshuffles=0;
+  S.humanPhase=null;S.selected=null;S.drawnFromDiscardId=null;S.justDrawnId=null;
+  for(const p of S.players){p.hand=[];p.lastResult=null;p.flash=null;}
+  for(let k=0;k<S.round;k++)for(const p of S.players)p.hand.push(S.stock.pop());
+  S.discard.push(S.stock.pop());
+  S.turn=S.dealer;
+  S.phase='playing';
+  banner('ROUND '+(S.roundIdx+1)+'<br><span style="font-size:.7em">'+wildName()+' ARE WILD!</span>');
+  sfx('round');
+  renderAll();
+  setTimeout(advance,1400);
+}
+function advance(){
+  if(!S||S.phase!=='playing')return;
+  if(S.outPlayer!==null&&S.finalLeft<=0){endRound();return;}
+  S.turn=(S.turn+1)%S.players.length;
+  if(S.outPlayer!==null&&S.turn===S.outPlayer){endRound();return;}
+  const p=S.players[S.turn];
+  if(p.human){
+    S.humanPhase='draw';
+    const top=S.discard[S.discard.length-1];
+    message((S.outPlayer!==null?'⚠️ LAST TURN! ':'')+'Your turn — draw from the deck'+(top?' or take the '+cardLabel(top):'')+'.');
+    renderAll();
+  }else{
+    message((S.outPlayer!==null?'Final turn: ':'')+p.emoji+' '+p.name+' is thinking…');
+    renderAll();
+    setTimeout(()=>aiTurn(p,S.turn),650+Math.random()*350);
+  }
+}
+function drawStock(){
+  if(S.stock.length===0){
+    const top=S.discard.pop();
+    S.stock=shuffle(S.discard);
+    S.discard=top?[top]:[];
+    S.reshuffles++;
+  }
+  return S.stock.pop();
+}
+function afterDiscard(idx){
+  sfx('discard');
+  const p=S.players[idx];
+  if(S.outPlayer===null){
+    const r=bestMeld(p.hand,S.round);
+    if(r.pts===0){
+      S.outPlayer=idx;
+      S.finalLeft=S.players.length-1;
+      banner((p.human?'YOU GO OUT!':p.name.toUpperCase()+' GOES OUT!')+'<br><span style="font-size:.65em">final turns…</span>');
+      sfx('goout');
+    }
+  }else if(idx!==S.outPlayer){
+    S.finalLeft--;
+  }
+  if(S.reshuffles>=4){endRound();return;}
+  renderAll();
+  setTimeout(advance,600);
+}
+
+/* ---------- AI turn ---------- */
+function aiTurn(p,idx){
+  if(!S||S.phase!=='playing')return;
+  const top=S.discard[S.discard.length-1];
+  let fromDisc=false;
+  if(top&&(S.stock.length>0||S.discard.length>1))fromDisc=aiWantsDiscardCard(p.hand,top,S.round,p.skill);
+  if(S.stock.length===0&&S.discard.length<=1)fromDisc=S.discard.length===1;
+  let card;
+  if(fromDisc)card=S.discard.pop();else card=drawStock();
+  p.hand.push(card);
+  p.flash=fromDisc?('took '+cardLabel(card)):'drew from deck';
+  sfx('draw');
+  renderAll();
+  setTimeout(()=>{
+    if(!S||S.phase!=='playing')return;
+    const opts=discardOptions(p.hand,S.round,fromDisc?card.id:null);
+    const pick=aiPick(opts,p.skill);
+    const di=p.hand.findIndex(c=>c.id===pick.id);
+    const dc=p.hand.splice(di,1)[0];
+    S.discard.push(dc);
+    p.flash=null;
+    renderAll();
+    afterDiscard(idx);
+  },800);
+}
+
+/* ---------- human actions ---------- */
+function isHumanTurn(){return S&&S.phase==='playing'&&S.turn===0;}
+$('#stockPile').addEventListener('click',()=>{
+  if(!isHumanTurn()||S.humanPhase!=='draw')return;
+  const c=drawStock();
+  me().hand.push(c);
+  S.drawnFromDiscardId=null;S.justDrawnId=c.id;S.humanPhase='discard';S.selected=null;
+  sfx('draw');
+  message('You drew '+cardLabel(c)+'. Pick a card to discard.');
+  renderAll();
+});
+$('#discardPile').addEventListener('click',()=>{
+  if(!isHumanTurn())return;
+  if(S.humanPhase==='draw'){
+    if(!S.discard.length)return;
+    const c=S.discard.pop();
+    me().hand.push(c);
+    S.drawnFromDiscardId=c.id;S.justDrawnId=c.id;S.humanPhase='discard';S.selected=null;
+    sfx('draw');
+    message('You took '+cardLabel(c)+'. Discard a different card.');
+    renderAll();
+  }else if(S.humanPhase==='discard'&&S.selected!=null){
+    doHumanDiscard();
+  }
+});
+$('#discardBtn').addEventListener('click',doHumanDiscard);
+function doHumanDiscard(){
+  if(!isHumanTurn()||S.humanPhase!=='discard'||S.selected==null)return;
+  const hand=me().hand;
+  const i=hand.findIndex(c=>c.id===S.selected);
+  if(i<0)return;
+  if(S.drawnFromDiscardId===hand[i].id){sfx('bad');message("You can't discard the card you just took from the pile!");return;}
+  const dc=hand.splice(i,1)[0];
+  S.discard.push(dc);
+  S.selected=null;S.humanPhase=null;S.justDrawnId=null;S.drawnFromDiscardId=null;
+  message('You discarded '+cardLabel(dc)+'.');
+  renderAll();
+  afterDiscard(0);
+}
+$('#hand').addEventListener('click',e=>{
+  const el=e.target.closest('.card[data-id]');
+  if(!el)return;
+  const id=+el.dataset.id;
+  if(S.humanPhase==='draw'){sfx('bad');message('Draw a card first — click the deck or the discard pile.');return;}
+  S.selected=(S.selected===id)?null:id;
+  sfx('select');
+  renderHand();
+});
+$('#hand').addEventListener('dblclick',e=>{
+  const el=e.target.closest('.card[data-id]');
+  if(!el||S.humanPhase!=='discard')return;
+  S.selected=+el.dataset.id;
+  doHumanDiscard();
+});
+$('#sortRankBtn').addEventListener('click',()=>{S.sortMode='rank';sortHand();renderHand();});
+$('#sortSuitBtn').addEventListener('click',()=>{S.sortMode='suit';sortHand();renderHand();});
+$('#smartBtn').addEventListener('click',()=>{S.sortMode='smart';sortHand();renderHand();sfx('select');});
+function sortHand(){
+  const h=me().hand,round=S.round;
+  if(S.sortMode==='rank')h.sort((a,b)=>(a.suit===JOKER?99:a.rank)-(b.suit===JOKER?99:b.rank)||a.suit-b.suit);
+  else if(S.sortMode==='suit')h.sort((a,b)=>a.suit-b.suit||a.rank-b.rank);
+  else{
+    const r=bestMeld(h,round);
+    const order=new Map();let k=0;
+    for(const m of r.melds)for(const c of m.cards)order.set(c.id,k++);
+    r.dead.sort((a,b)=>cardValue(b,round)-cardValue(a,round));
+    for(const c of r.dead)order.set(c.id,k++);
+    h.sort((a,b)=>order.get(a.id)-order.get(b.id));
+  }
+}
+
+/* ---------- round end / game over ---------- */
+function endRound(){
+  if(S.phase!=='playing')return;
+  S.phase='roundEnd';
+  for(let i=0;i<S.players.length;i++){
+    const p=S.players[i];
+    const r=bestMeld(p.hand,S.round);
+    p.lastResult=r;
+    p.scores[S.round]=r.pts;
+    p.total+=r.pts;
+    if(i===S.outPlayer)p.out[S.round]=true;
+  }
+  sfx('round');
+  renderAll();
+  showRoundOverlay();
+}
+function showRoundOverlay(){
+  const last=S.roundIdx===ROUNDS.length-1;
+  const sorted=[...S.players].map((p,i)=>({p,i})).sort((a,b)=>a.p.scores[S.round]-b.p.scores[S.round]);
+  let html='<h2>ROUND '+(S.roundIdx+1)+' RESULTS</h2>';
+  for(const {p,i} of sorted){
+    html+=`<div class="result-row ${p.scores[S.round]===0?'winner':''}">
+      <div class="result-head"><span style="font-size:22px">${p.emoji}</span> ${esc(p.name)}
+        ${i===S.outPlayer?'<span class="outstar">WENT OUT ★</span>':''}
+        <span class="pts">+${p.scores[S.round]} pts <span style="color:#777;font-size:13px">(total ${p.total})</span></span>
+      </div>
+      <div class="meldline">${meldChips(p.lastResult)}</div>
+    </div>`;
+  }
+  html+=scoreTableHTML();
+  html+=`<div class="obtns"><button class="btn green" id="nextRoundBtn">${last?'🏁 FINAL RESULTS':'▶ NEXT ROUND — deal '+(ROUNDS[S.roundIdx+1])+' cards'}</button></div>`;
+  $('#roundBox').innerHTML=html;
+  $('#roundOverlay').classList.remove('hidden');
+  $('#nextRoundBtn').addEventListener('click',()=>{
+    $('#roundOverlay').classList.add('hidden');
+    if(last){showGameOver();}
+    else{S.roundIdx++;S.dealer=(S.dealer+1)%S.players.length;startRound();}
+  });
+}
+function meldChips(r){
+  let html='';
+  for(const m of r.melds){
+    html+='<div class="meldgroup">'+m.cards.map(c=>cardHTML(c,'sm')).join('')+'</div>';
+  }
+  if(r.dead.length){
+    html+='<div class="glabel">left over →</div><div class="meldgroup deadg">'+r.dead.map(c=>cardHTML(c,'sm')).join('')+'</div>';
+  }
+  if(!r.melds.length&&!r.dead.length)html='<div class="glabel">—</div>';
+  return html;
+}
+function showGameOver(){
+  S.phase='over';
+  const standings=[...S.players].sort((a,b)=>a.total-b.total);
+  let html='<h2>🏆 GAME OVER 🏆</h2>';
+  standings.forEach((p,i)=>{
+    html+=`<div class="standing ${i===0?'first':''}">
+      <span style="font-size:26px">${i===0?'👑':['🥈','🥉'][i-1]||'🎖'}</span>
+      <span style="font-size:24px">${p.emoji}</span> ${esc(p.name)}
+      ${p.human?'<span style="font-size:13px;color:#666">(you)</span>':''}
+      <span class="pl">${p.total} pts</span></div>`;
+  });
+  html+=scoreTableHTML();
+  html+=`<div class="obtns">
+    <button class="btn green" id="againBtn">↻ Play Again</button>
+    <button class="btn blue" id="setupBtn">⚙ New Setup</button></div>`;
+  $('#gameOverBox').innerHTML=html;
+  $('#gameOverlay').classList.remove('hidden');
+  sfx('win');
+  startConfetti();
+  $('#againBtn').addEventListener('click',()=>{
+    stopConfetti();
+    $('#gameOverlay').classList.add('hidden');
+    for(const p of S.players){p.total=0;p.scores={};p.out={};}
+    S.roundIdx=0;S.dealer=Math.floor(Math.random()*S.players.length);
+    startRound();
+  });
+  $('#setupBtn').addEventListener('click',()=>{
+    stopConfetti();
+    $('#gameOverlay').classList.add('hidden');
+    $('#game').classList.add('hidden');
+    $('#setup').classList.remove('hidden');
+    S=null;
+  });
+}
+function scoreTableHTML(){
+  let html='<table class="scoretab"><tr><th>Round</th><th>Cards</th>';
+  for(const p of S.players)html+='<th>'+p.emoji+'<br>'+esc(p.name)+'</th>';
+  html+='</tr>';
+  for(let ri=0;ri<ROUNDS.length;ri++){
+    const rd=ROUNDS[ri];
+    html+='<tr'+(ri===S.roundIdx&&S.phase!=='over'?' class="cur"':'')+'><td>'+(ri+1)+'</td><td>'+rd+' <span style="color:#999">('+rankName(rd)+'s wild)</span></td>';
+    for(const p of S.players){
+      const v=p.scores[rd];
+      html+='<td>'+(v===undefined?'·':(p.out[rd]?'<span class="went">★'+v+'</span>':v))+'</td>';
+    }
+    html+='</tr>';
+  }
+  html+='<tr><td class="tot" colspan="2">TOTAL</td>';
+  for(const p of S.players)html+='<td class="tot">'+p.total+'</td>';
+  html+='</tr></table><div style="text-align:center;font-size:12px;color:#777">★ = went out</div>';
+  return html;
+}
+
+/* ---------- rendering ---------- */
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+function cardLabel(c){
+  if(c.suit===JOKER)return '🃏 Joker';
+  return rankName(c.rank)+SUITS[c.suit].s;
+}
+function cardHTML(c,cls,attrs){
+  cls=cls||'';attrs=attrs||'';
+  if(c.suit===JOKER)return `<div class="card joker ${cls}" ${attrs}><div class="jk">🃏</div><div class="jlabel">JOKER</div></div>`;
+  const su=SUITS[c.suit];
+  const wild=S&&c.rank===S.round;
+  return `<div class="card ${wild?'wildc':''} ${cls}" style="--sc:${su.c}" ${attrs}>
+    <div class="corner">${rankName(c.rank)}<span>${su.s}</span></div>
+    <div class="big">${su.s}</div>
+    <div class="corner br">${rankName(c.rank)}<span>${su.s}</span></div>
+    ${wild?'<div class="wbadge">WILD</div>':''}</div>`;
+}
+function message(t){$('#msgTxt').textContent=t;}
+function banner(html){
+  const b=$('#banner');
+  b.innerHTML=html;
+  b.classList.remove('show');
+  void b.offsetWidth;
+  b.classList.add('show');
+}
+function renderAll(){
+  if(!S)return;
+  renderHeader();renderOpponents();renderCenter();renderHand();renderDrawer();
+}
+function renderHeader(){
+  $('#roundChip').textContent='Round '+(S.roundIdx+1)+' / 11 · '+S.round+' cards';
+  $('#wildChip').textContent='✨ WILD: '+wildName()+' + Jokers';
+}
+function renderOpponents(){
+  let html='';
+  for(let i=1;i<S.players.length;i++){
+    const p=S.players[i];
+    const active=S.phase==='playing'&&S.turn===i;
+    html+=`<div class="opp ${active?'active':''} ${S.outPlayer===i?'outp':''}">
+      ${S.outPlayer===i?'<div class="outbadge">OUT!</div>':''}
+      <div class="ava">${p.emoji}</div>
+      <div class="nm">${esc(p.name)} <span class="sk">${SKILLS[p.skill].icon}</span></div>
+      <div class="minis">${'<div class="mini"></div>'.repeat(Math.min(p.hand.length,13))}</div>
+      <div class="sc">${p.total} pts</div>
+      ${p.flash?'<div class="flash">'+esc(p.flash)+'</div>':''}
+    </div>`;
+  }
+  $('#opponents').innerHTML=html;
+}
+function renderCenter(){
+  const stock=$('#stockPile');
+  const myDraw=isHumanTurn()&&S.humanPhase==='draw';
+  stock.className='pile'+(myDraw?' glow':'');
+  stock.innerHTML=(S.stock.length?'<div class="card back" style="transform:translate(3px,3px)"></div><div class="card back" style="transform:translate(1.5px,1.5px)"></div><div class="card back"></div>':'<div class="empty"></div>')
+    +'<div class="count">'+S.stock.length+'</div>';
+  const disc=$('#discardPile');
+  disc.className='pile'+(myDraw&&S.discard.length?' glow':'');
+  const top=S.discard[S.discard.length-1];
+  disc.innerHTML=(top?cardHTML(top):'<div class="empty"></div>')+'<div class="count">'+S.discard.length+'</div>';
+  const wi=$('#wildIndicator');
+  wi.innerHTML='<div class="wbig">WILD</div>'+cardHTML({id:-1,suit:0,rank:S.round},'sm')+'<div style="font-size:11px;font-weight:800;margin-top:3px;text-shadow:1px 1px 0 #000">&amp; JOKERS</div>';
+}
+function renderHand(){
+  const p=me(),hand=p.hand;
+  const active=S.phase==='playing'&&S.turn===0;
+  $('#youChip').className='you'+(active?' active':'');
+  $('#youChip').innerHTML='😎 <b>'+esc(p.name)+'</b> · '+p.total+' pts'+(S.outPlayer===0?' · <b style="color:#2fa84f">OUT!</b>':'');
+  // meld highlight on current hand
+  const r=bestMeld(hand,S.round);
+  const meldIds=new Set();
+  for(const m of r.melds)for(const c of m.cards)meldIds.add(c.id);
+  $('#hand').innerHTML=hand.map(c=>{
+    let cls='';
+    if(meldIds.has(c.id))cls+=' meldhl';
+    if(S.selected===c.id)cls+=' sel';
+    if(S.justDrawnId===c.id)cls+=' justdrawn';
+    return cardHTML(c,cls,'data-id="'+c.id+'"');
+  }).join('');
+  // deadwood label
+  const lbl=$('#deadwoodLbl');
+  if(S.humanPhase==='discard'&&S.selected!=null){
+    const rest=hand.filter(c=>c.id!==S.selected);
+    const rr=bestMeld(rest,S.round);
+    lbl.innerHTML=rr.pts===0?'⬇ Discard it — <b>YOU GO OUT! 🎉</b>':'If you discard: <b>'+rr.pts+'</b> pts left';
+  }else if(S.humanPhase==='discard'){
+    lbl.innerHTML='Pick a card to discard';
+  }else{
+    lbl.innerHTML=r.pts===0?'<b>Ready to GO OUT!</b> 🎉':'Best arrangement leaves <b>'+r.pts+'</b> pts';
+  }
+  $('#discardBtn').disabled=!(isHumanTurn()&&S.humanPhase==='discard'&&S.selected!=null);
+}
+function renderDrawer(){$('#drawerBody').innerHTML=scoreTableHTML();}
+
+/* ---------- header buttons ---------- */
+$('#scoreBtn').addEventListener('click',()=>{renderDrawer();$('#drawer').classList.toggle('open');});
+$('#rulesBtn').addEventListener('click',()=>$('#rulesOverlay').classList.remove('hidden'));
+$('#muteBtn').addEventListener('click',()=>{muted=!muted;$('#muteBtn').textContent=muted?'🔇':'🔊';});
+$('#newBtn').addEventListener('click',()=>{
+  stopConfetti();
+  $('#gameOverlay').classList.add('hidden');
+  $('#roundOverlay').classList.add('hidden');
+  $('#game').classList.add('hidden');
+  $('#setup').classList.remove('hidden');
+  S=null;
+});
+
+/* ---------- confetti ---------- */
+let confTimer=null;
+function startConfetti(){
+  const cv=$('#confetti'),ctx=cv.getContext('2d');
+  cv.width=innerWidth;cv.height=innerHeight;
+  const cols=['#ffd83d','#ff5d5d','#51e07e','#5db4ff','#d98aff','#fff'];
+  const ps=Array.from({length:160},()=>({
+    x:Math.random()*cv.width,y:-20-Math.random()*cv.height,
+    w:6+Math.random()*7,h:8+Math.random()*9,
+    vy:1.6+Math.random()*2.8,vx:-1+Math.random()*2,
+    rot:Math.random()*6.28,vr:-0.12+Math.random()*0.24,
+    c:cols[Math.floor(Math.random()*cols.length)]
+  }));
+  function step(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    for(const p of ps){
+      p.y+=p.vy;p.x+=p.vx;p.rot+=p.vr;
+      if(p.y>cv.height+20){p.y=-20;p.x=Math.random()*cv.width;}
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);
+      ctx.fillStyle=p.c;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();
+    }
+    confTimer=requestAnimationFrame(step);
+  }
+  stopConfetti();step();
+}
+function stopConfetti(){
+  if(confTimer){cancelAnimationFrame(confTimer);confTimer=null;}
+  const cv=$('#confetti');cv.getContext('2d').clearRect(0,0,cv.width,cv.height);
+}
+</script>
+</body>
+</html>
