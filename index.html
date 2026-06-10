@@ -3,10 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#22307a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Five Crowns 👑</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Baloo+2:wght@500;700;800&display=swap');
-*{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 html{touch-action:manipulation;-webkit-text-size-adjust:100%}
 html,body{min-height:100%}
 body{
@@ -46,7 +49,7 @@ body{
 .setup-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0;text-align:left}
 .setup-row label{font-weight:800;font-size:17px}
 .setup-row input[type=text]{font-family:'Baloo 2';font-weight:700;font-size:16px;padding:7px 12px;border:3px solid #1b1b2f;border-radius:10px;width:200px;background:#fff}
-select{font-family:'Baloo 2';font-weight:700;font-size:15px;padding:6px 10px;border:3px solid #1b1b2f;border-radius:10px;background:#fff;cursor:pointer}
+select{font-family:'Baloo 2';font-weight:700;font-size:16px;padding:6px 10px;border:3px solid #1b1b2f;border-radius:10px;background:#fff;cursor:pointer}
 .opp-setup{background:#f1ecff;border:3px solid #1b1b2f;border-radius:14px;padding:8px 12px;margin:6px 0;display:flex;align-items:center;gap:10px;justify-content:space-between}
 .opp-setup .who{font-weight:800;font-size:17px;display:flex;align-items:center;gap:8px}
 .opp-setup .who span.em{font-size:24px}
@@ -112,7 +115,7 @@ header .spacer{flex:1}
 }
 #hand .card{margin-left:-30px;cursor:pointer}
 #hand .card:first-child{margin-left:0}
-#hand .card:hover{transform:translateY(-10px)}
+@media(hover:hover){#hand .card:hover{transform:translateY(-10px)}}
 #hand .card.sel{transform:translateY(-22px);box-shadow:0 0 0 4px #ffd83d,0 10px 14px rgba(0,0,0,.4)}
 .card.meldhl{box-shadow:0 0 0 3px #51e07e,0 4px 8px rgba(0,0,0,.35)}
 #hand .card.sel.meldhl{box-shadow:0 0 0 4px #ffd83d,0 0 0 7px #51e07e,0 10px 14px rgba(0,0,0,.4)}
@@ -193,7 +196,9 @@ table.scoretab{border-collapse:collapse;margin:6px auto;font-size:14px;width:100
   header .gametitle{display:none}
   .roundchip,.wildchip{font-size:12px;padding:3px 8px}
   .btn.small{font-size:12px;padding:4px 9px}
-  #opponents{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding:8px 8px 2px;-webkit-overflow-scrolling:touch}
+  #opponents{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding:8px 8px 26px;margin-bottom:-22px;-webkit-overflow-scrolling:touch}
+  .overlay{padding:10px}
+  .overlay .obox{padding:16px 14px}
   .opp{min-width:104px;padding:4px 8px;flex:none}
   .opp .ava{font-size:24px}.opp .nm{font-size:12px}
   #felt{min-height:150px;gap:18px}
@@ -469,6 +474,13 @@ let muted=false;
 
 /* ---------- sounds ---------- */
 let AC=null;
+// iOS requires a user gesture to unlock audio
+document.addEventListener('touchend',()=>{
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended')AC.resume();
+  }catch(e){}
+},{once:true,passive:true});
 function tone(freq,dur,type,vol,when){
   const t=AC.currentTime+(when||0);
   const o=AC.createOscillator(),g=AC.createGain();
@@ -556,6 +568,12 @@ function advance(){
     const top=S.discard[S.discard.length-1];
     message((S.outPlayer!==null?'⚠️ LAST TURN! ':'')+'Your turn — draw from the deck'+(top?' or take the '+cardLabel(top):'')+'.');
     renderAll();
+    setTimeout(()=>{ // on small screens, bring the table & hand into view
+      if(document.body.scrollHeight>window.innerHeight+10){
+        const ha=document.getElementById('handArea');
+        if(ha)ha.scrollIntoView({behavior:'smooth',block:'end'});
+      }
+    },150);
   }else{
     message((S.outPlayer!==null?'Final turn: ':'')+p.emoji+' '+p.name+' is thinking…');
     renderAll();
@@ -720,6 +738,7 @@ function showRoundOverlay(){
   html+=`<div class="obtns"><button class="btn green" id="nextRoundBtn">${last?'🏁 FINAL RESULTS':'▶ NEXT ROUND — deal '+(ROUNDS[S.roundIdx+1])+' cards'}</button></div>`;
   $('#roundBox').innerHTML=html;
   $('#roundOverlay').classList.remove('hidden');
+  $('#roundOverlay').scrollTop=0;
   $('#nextRoundBtn').addEventListener('click',()=>{
     $('#roundOverlay').classList.add('hidden');
     if(last){showGameOver();}
@@ -754,6 +773,7 @@ function showGameOver(){
     <button class="btn blue" id="setupBtn">⚙ New Setup</button></div>`;
   $('#gameOverBox').innerHTML=html;
   $('#gameOverlay').classList.remove('hidden');
+  $('#gameOverlay').scrollTop=0;
   sfx('win');
   startConfetti();
   $('#againBtn').addEventListener('click',()=>{
